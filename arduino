@@ -1,0 +1,68 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+
+LiquidCrystal_I2C lcd(0x7F, 20, 4); // Adjust the address if needed
+Servo LemonadeServo;
+Servo GatoradeServo;
+Servo PoweradeServo;
+
+int LemonadeButton = 2; // Pin for Lemonade button
+int GatoradeButton = 3; // Pin for Gatorade button
+int PoweradeButton = 4; // Pin for Powerade button
+
+bool LemonadeServoActive = false;
+bool GatoradeServoActive = false;
+bool PoweradeServoActive = false;
+
+void setup() {
+  lcd.begin(20, 4);
+  lcd.print("Choose Beverage\n1: Lemonade\n2: Gatorade\n3: Powerade");
+
+  LemonadeServo.attach(9); // Pin for Lemonade servo
+  GatoradeServo.attach(10); // Pin for Gatorade servo
+  PoweradeServo.attach(11); // Pin for Powerade servo
+
+  pinMode(LemonadeButton, INPUT);
+  pinMode(GatoradeButton, INPUT);
+  pinMode(PoweradeButton, INPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (digitalRead(LemonadeButton) == HIGH && !LemonadeServoActive) {
+    dispenseDrink(LemonadeServo, "Lemonade");
+  }
+
+  if (digitalRead(GatoradeButton) == HIGH && !GatoradeServoActive) {
+    dispenseDrink(GatoradeServo, "Gatorade");
+  }
+
+  if (digitalRead(PoweradeButton) == HIGH && !PoweradeServoActive) {
+    dispenseDrink(PoweradeServo, "Powerade");
+  }
+}
+
+void dispenseDrink(Servo& servo, const char* drinkName) {
+  lcd.clear();
+  lcd.print("Dispensing...\n" + String(drinkName));
+  delay(2000);
+  servo.write(180);
+  delay(2000);
+  servo.write(0);
+  servo.detach();
+  lcd.clear();
+  lcd.print("Choose Beverage\n1: Lemonade\n2: Gatorade\n3: Powerade");
+
+  if (&servo == &LemonadeServo) {
+    LemonadeServoActive = false;
+    delay(500);
+  } else if (&servo == &GatoradeServo) {
+    GatoradeServoActive = false;
+    delay(500);
+  } else if (&servo == &PoweradeServo) {
+    PoweradeServoActive = false;
+    delay(500);
+  }
+}
